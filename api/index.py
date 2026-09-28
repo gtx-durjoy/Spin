@@ -80,7 +80,7 @@ class GarenaAPI:
     def perform_major_login(self, access_token: str, open_id: str, lang: str):
         try:
             payload_parts = [
-                b'\x1a\x132025-08-30 05:19:21"\tfree fire(\x01:\x081.114.13B2Android OS 9 / API-28 (PI/rel.cjw.20220518.114133)J\x08HandheldR\nATM MobilsZ\x04WIFI`\xb6\nh\xee\x05r\x03300z\x1fARMv7 VFPv3 NEON VMH | 2400 | 2\x80\x01\xc9\x0f\x8a\x01\x0fAdreno (TM) 640\x92\x01\rOpenGL ES 3.2\x9a\x01+Google|dfa4ab4b-9dc4-454e-8065-e70c733fa53f\xa2\x01\x0e105.235.139.91\xaad\x01\x02',
+                b'\x1a\x132025-08-30 05:19:21"\tfree fire(\x01:\x081.114.13B2Android OS 9 / API-28 (PI/rel.cjw.20220518.114133)J\x08HandheldR\nATM MobilsZ\x04WIFI`\xb6\nh\xee\x05r\x03300z\x1fARMv7 VFPv3 NEON VMH | 2400 | 2\x80\x01\xc9\x0f\x8a\x01\x0fAdreno (TM) 640\x92\x01\rOpenGL ES 3.2\x9a\x01+Google|dfa4ab4b-9dc4-454e-8065-e70c733fa53f\xa2\x01\x0e105.235.139.91\xaa\x01\x02',
                 lang.encode("ascii"),
                 b'\xb2\x01 1d8ec0240ede109973f3321b9354b44d\xba\x01\x014\xc2\x01\x08Handheld\xca\x01\x10Asus ASUS_I005DA\xea\x01@afcfbf13334be42036e4f742c80b956344bed760ac91b3aff9b607a610ab4390\xf0\x01\x01\xca\x02\nATM Mobils\xd2\x02\x04WIFI\xca\x03 7428b253defc164018c604a1ebbfebdf\xe0\x03\xa8\x81\x02\xe8\x03\xf6\xe5\x01\xf0\x03\xaf\x13\xf8\x03\x84\x07\x80\x04\xe7\xf0\x01\x88\x04\xa8\x81\x02\x90\x04\xe7\xf0\x01\x98\x04\xa8\x81\x02\xc8\x04\x01\xd2\x04=/data/app/com.dts.freefireth-PdeDnOilCSFn37p1AH_FLg==/lib/arm\xe0\x04\x01\xea\x04_2087f61c19f57f2af4e7feff0b24d9d9|/data/app/com.dts.freefireth-PdeDnOilCSFn37p1AH_FLg==/base.apk\xf0\x04\x03\xf8\x04\x01\x8a\x05\x0232\x9a\x05\n2019118693\xb2\x05\tOpenGLES2\xb8\x05\xff\x7f\xc0\x05\x04\xe0\x05\xf3F\xea\x05\x07android\xf2\x05pKqsHT5ZLWrYljNb5Vqh//yFRlaPHSO9NWSQsVvOmdhEEn7W+VHNUK+Q+fduA3ptNrGB0Ll0LRz3WW0jOwesLj6aiU7sZ40p8BfUE/FI/jzSTwRe2\xf8\x05\xfb\xe4\x06\x88\x06\x01\x90\x06\x01\x9a\x06\x014\xa2\x06\x014\xb2\x06"GQ@O\x00\x0e^\x00D\x06UA\x0ePM\r\x13hZ\x07T\x06\x0cm\\V\x0ejYV;\x0bU5'
             ]
@@ -137,28 +137,33 @@ def generate():
             "Connection": "Keep-Alive", "Accept": "application/json", "Accept-Encoding": "gzip",
             "Authorization": f"Signature {SecurityEngine.generate_signature(reg_payload)}",
             "Content-Type": "application/json; charset=utf-8",
+            "Cookie": "datadome=oYpIhVco_RFvLHe_T9KFd5wuY0gcQuNfrlt4rHJY5QOkwv4TGt8gPMK32MbHuBdzJyfXnXlfzNZT_2tHr2kys8AMYT2~T71QP1S78_7Pdx4JLOXdSrflPT6cOX2vsyJh",
             "Host": "100067.connect.garena.com",
         }
         
         resp_reg = api.session.post("https://100067.connect.garena.com/api/v2/oauth/guest:register", headers=headers_reg, data=reg_payload, timeout=10, verify=False)
-        if resp_reg.status_code != 200 or resp_reg.json().get("code") != 0:
+        resp_json = resp_reg.json() if resp_reg.text else {}
+        if resp_reg.status_code != 200 or resp_json.get("code") != 0:
             return jsonify({"status": "error", "message": "Failed at guest registration step."})
             
-        uid = resp_reg.json()['data']['uid']
+        uid = resp_json['data']['uid']
         
-        xml_payload = {
+        tok_payload = json.dumps({
             "client_id": 100067, "client_secret": Config.API_HEX_KEY, "client_type": 2, 
             "device_id": "02-344afb0e-593c-40b7-92f2-171972f74807", "password": password, 
             "response_type": "token", "uid": uid,
-        }
-        tok_payload = json.dumps(xml_payload, separators=(',', ':'))
+        }, separators=(',', ':'))
         
-        resp_tok = api.session.post("https://100067.connect.garena.com/api/v2/oauth/guest/token:grant", headers=headers_reg, data=tok_payload, timeout=10, verify=False)
-        if resp_tok.status_code != 200 or resp_tok.json().get("code") != 0:
+        headers_tok = headers_reg.copy()
+        headers_tok["Cookie"] = "datadome=y23Z3X17pgkMHEt5zY8dqxC6BIf7WJMgC0RXNbqifHT7t9zajKe_hegFb1Ie9_7JixXpz7FRGVodOn~mWPk_NrqIIhUOXDYqKOahzoRQcyEy77GWEMcdA9_MqPJeM5qv"
+        
+        resp_tok = api.session.post("https://100067.connect.garena.com/api/v2/oauth/guest/token:grant", headers=headers_tok, data=tok_payload, timeout=10, verify=False)
+        tok_json = resp_tok.json() if resp_tok.text else {}
+        if resp_tok.status_code != 200 or tok_json.get("code") != 0:
             return jsonify({"status": "error", "message": "Failed at token grant step."})
             
-        access_token = resp_tok.json()['data']['access_token']
-        open_id = resp_tok.json()['data']['open_id']
+        access_token = tok_json['data']['access_token']
+        open_id = tok_json['data']['open_id']
 
         keystream = [0x30,0x30,0x30,0x32,0x30,0x31,0x37,0x30,0x30,0x30,0x30,0x30,0x32,0x30,0x31,0x37,0x30,0x30,0x30,0x30,0x30,0x32,0x30,0x31,0x37,0x30,0x30,0x30,0x30,0x30,0x32,0x30]
         field = codecs.decode(''.join(chr(ord(open_id[i]) ^ keystream[i % len(keystream)]) for i in range(len(open_id))).encode('unicode_escape').decode('utf-8'), 'unicode_escape').encode('latin1')
@@ -188,4 +193,4 @@ def generate():
 
 if __name__ == '__main__':
     app.run(debug=True)
-        
+            
