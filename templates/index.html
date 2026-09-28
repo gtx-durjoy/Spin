@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rixor Account Generator UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
+    <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-96 border border-cyan-500/30">
+        <h1 class="text-2xl font-bold mb-6 text-cyan-400 text-center">Rixor Generator V2</h1>
+        <form id="genForm">
+            <div class="mb-4">
+                <label class="block text-sm mb-2 text-gray-300">Select Server</label>
+                <select id="region" class="w-full p-2.5 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-cyan-400">
+                    <option value="BD">BD (Bangladesh)</option>
+                    <option value="IND">IND (India)</option>
+                    <option value="PK">PK (Pakistan)</option>
+                    <option value="SG">SG (Singapore)</option>
+                    <option value="ID">ID (Indonesia)</option>
+                    <option value="ME">ME (Middle East)</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm mb-2 text-gray-300">Name Prefix</label>
+                <input type="text" id="prefix" value="Rixor" class="w-full p-2.5 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-cyan-400">
+            </div>
+            <button type="submit" id="genBtn" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white p-2.5 rounded font-bold transition duration-200 cursor-pointer">Generate Account</button>
+        </form>
+        <div id="result" class="mt-4 text-sm text-center font-medium"></div>
+    </div>
+
+    <script>
+        document.getElementById('genForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const region = document.getElementById('region').value;
+            const prefix = document.getElementById('prefix').value;
+            const resDiv = document.getElementById('result');
+            const btn = document.getElementById('genBtn');
+            
+            resDiv.innerText = "Generating account, please wait...";
+            resDiv.className = "mt-4 text-sm text-center font-medium text-yellow-400";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ region, prefix })
+                });
+                const data = await response.json();
+                if(data.status === 'success') {
+                    resDiv.innerHTML = `✅ Successfully Generated!<br><span class='text-xs text-gray-300'>UID: ${data.data.uid} | Name: ${data.data.name}</span>`;
+                    resDiv.className = "mt-4 text-sm text-center font-medium text-green-400";
+                } else {
+                    resDiv.innerText = "❌ Error: " + data.message;
+                    resDiv.className = "mt-4 text-sm text-center font-medium text-red-400";
+                }
+            } catch (err) {
+                resDiv.innerText = "❌ Connection failed!";
+                resDiv.className = "mt-4 text-sm text-center font-medium text-red-400";
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
