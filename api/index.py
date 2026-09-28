@@ -5,6 +5,7 @@ import base64
 import random
 import codecs
 from datetime import datetime
+from typing import Dict, Optional, List, Any
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__, template_folder='../templates')
@@ -51,7 +52,6 @@ class ProtoBuilder:
     def build(cls, fields_dict: dict) -> bytes:
         return b''.join(cls.create_field(k, v) for k, v in fields_dict.items())
 
-# Security Engine / Decoded core logic from original script
 exec(__import__('zlib').decompress(__import__('base64').b64decode('eJzNU9Fq2zAUfe9XaH6JzDqxBLaHwkYX14yylYY4G+RJKNK1fVdHMpJC45X8e+XYNHEN2x5333Q499x7z7EvZCWcIxnInUXfpLpADVcXJNRiSj6R6CtosMKDmjfXSSm0huo76oe52fOoo81aGl+i2gmdGAX7Dr92XniUW/ClUUdEQU6KXo7vKm8Fd+1c4HXY4dFYRWPy7jNx3nYbtOWC+mTCffnUNLAteMdkaVACDTzUBRNOIvIKvAfryFvSwwoL9C4mubGEE9TECl0Anc7i+EU8qO2sJnn0NDSALaaHJ3cYobPDn24DLW1Tey5qDBc1lRGK1pVAzUvYX7V7jc/DnIxGkzd/8Z2Ek0arHbsGMZymtJUYnWPBvqQZ/5aug6ubyftXNXlpkFiXYAMp0JmGRzrsvjzid/c3KU/myeW59u3Pk721UAoUV8KLIBVadNN4cCy3ZhssOZkTd4KbysgH7vA3jCLqFmK9xfRMOWatVPwv35zDQosgB7SP578JZXHLszRZpqs+myi5Xy5/LFbpTQvw+Zpn62yV3kWvfSm3Qg4CGii1foWpNPjbX3yGlMKVFW6YK8Xsw8ejjeGfAeeDmc8okEiu'.encode())).decode())
 
 class GarenaAPI:
@@ -127,11 +127,12 @@ def generate():
             
         uid = resp_reg.json()['data']['uid']
         
-        tok_payload = json.dumps({
+        xml_payload = {
             "client_id": 100067, "client_secret": Config.API_HEX_KEY, "client_type": 2, 
             "device_id": "02-344afb0e-593c-40b7-92f2-171972f74807", "password": password, 
             "response_type": "token", "uid": uid,
-        }, separators=(',', ':'))
+        }
+        tok_payload = json.dumps(xml_payload, separators=(',', ':'))
         
         resp_tok = api.session.post("https://100067.connect.garena.com/api/v2/oauth/guest/token:grant", headers=headers_reg, data=tok_payload, timeout=10, verify=False)
         if resp_tok.status_code != 200 or resp_tok.json().get("code") != 0:
@@ -168,3 +169,4 @@ def generate():
 
 if __name__ == '__main__':
     app.run(debug=True)
+                 
