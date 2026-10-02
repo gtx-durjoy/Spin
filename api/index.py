@@ -7,33 +7,49 @@ import os
 
 app = Flask(__name__)
 
-def generate_guest_credentials():
-    # গ্যারেনা OAuth / জেনারেশন লজিক
+def generate_guest_payload(prefix, region):
+    # Random ID and Account Details Generation
     uid = "".join(random.choices(string.digits, k=10))
     password = "".join(random.choices(string.ascii_letters + string.digits, k=12))
-    token = "".join(random.choices(string.ascii_hexdata, k=32)).lower()
-    return uid, password, token
+    name = f"{prefix}_{random.randint(100, 999)}"
+    
+    return {
+        "uid": uid,
+        "password": password,
+        "name": name,
+        "region": region,
+        "status": "Active & Registered"
+    }
 
-@app.route('/api/generate', methods=['POST'])
-def handle_generation():
+@app.route('/api/generate', methods=['POST', 'GET'])
+def generate_account():
+    # CORS Headers Handling
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'OK'}), 200
+
+    if request.method == 'GET':
+        return jsonify({
+            "status": "online",
+            "message": "DURJOYS MOD API is active!"
+        }), 200
+
     try:
-        data = request.json or {}
+        data = request.get_json(force=True, silent=True) or {}
         region = data.get('region', 'BD')
-        
-        # অ্যাকাউন্ট জেনারেশন এবং রিওক প্রসেস
-        uid, password, token = generate_guest_credentials()
-        
+        prefix = data.get('prefix', 'DURJOY')
+
+        if not prefix.strip():
+            prefix = "DURJOY"
+
+        # Account Processing Logic
+        account_data = generate_guest_payload(prefix, region)
+
         return jsonify({
             "success": True,
-            "data": {
-                "uid": uid,
-                "password": password,
-                "token": token,
-                "region": region,
-                "status": "Activated & Ready"
-            },
-            "message": "DURJOYS MOD: Account created successfully!"
-        })
+            "data": account_data,
+            "message": "Account generated successfully!"
+        }), 200
+
     except Exception as e:
         return jsonify({
             "success": False,
