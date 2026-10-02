@@ -3,66 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rixor Account Generator UI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>DURJOYS MOD | FF Account Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #080b10;
+            --panel-bg: #0e131d;
+            --accent-neon: #00ffcc;
+            --accent-pink: #ff0055;
+            --text-main: #e2e8f0;
+            --border-glow: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .panel-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 480px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-neon), var(--accent-pink));
+        }
+
+        .header h1 {
+            font-size: 32px;
+            text-align: center;
+            color: var(--accent-neon);
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.4);
+        }
+
+        .header p {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        .field-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background: #04060a;
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            color: var(--accent-neon);
+            font-size: 16px;
+            outline: none;
+        }
+
+        .btn-gen {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent-neon);
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-gen:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .btn-gen:disabled {
+            background: #334155;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .output-box {
+            margin-top: 25px;
+            background: #04060a;
+            border: 1px solid #1e293b;
+            border-radius: 6px;
+            padding: 15px;
+            display: none;
+        }
+
+        .output-box pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #38bdf8;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+            width: 100%;
+            padding: 8px;
+            background: transparent;
+            border: 1px solid var(--accent-neon);
+            color: var(--accent-neon);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(0, 255, 204, 0.1);
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
-    <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-96 border border-cyan-500/30">
-        <h1 class="text-2xl font-bold mb-6 text-cyan-400 text-center">Rixor Generator V2</h1>
-        <form id="genForm">
-            <div class="mb-4">
-                <label class="block text-sm mb-2 text-gray-300">Select Server</label>
-                <select id="region" class="w-full p-2.5 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-cyan-400">
-                    <option value="BD">BD (Bangladesh)</option>
-                    <option value="IND">IND (India)</option>
-                    <option value="PK">PK (Pakistan)</option>
-                    <option value="SG">SG (Singapore)</option>
-                    <option value="ID">ID (Indonesia)</option>
-                    <option value="ME">ME (Middle East)</option>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm mb-2 text-gray-300">Name Prefix</label>
-                <input type="text" id="prefix" value="Rixor" class="w-full p-2.5 bg-gray-700 rounded border border-gray-600 focus:outline-none focus:border-cyan-400">
-            </div>
-            <button type="submit" id="genBtn" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white p-2.5 rounded font-bold transition duration-200 cursor-pointer">Generate Account</button>
-        </form>
-        <div id="result" class="mt-4 text-sm text-center font-medium"></div>
+<body>
+
+<div class="panel-card">
+    <div class="header">
+        <h1>DURJOYS MOD</h1>
+        <p>POWERFUL FF GUEST CREATOR</p>
     </div>
 
-    <script>
-        document.getElementById('genForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const region = document.getElementById('region').value;
-            const prefix = document.getElementById('prefix').value;
-            const resDiv = document.getElementById('result');
-            const btn = document.getElementById('genBtn');
-            
-            resDiv.innerText = "Generating account, please wait...";
-            resDiv.className = "mt-4 text-sm text-center font-medium text-yellow-400";
-            btn.disabled = true;
+    <div class="field-group">
+        <label for="region">Select Region</label>
+        <select id="region">
+            <option value="BD">Bangladesh (BD)</option>
+            <option value="IND">India (IND)</option>
+            <option value="PK">Pakistan (PK)</option>
+            <option value="SG">Singapore (SG)</option>
+        </select>
+    </div>
 
-            try {
-                const response = await fetch('/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ region, prefix })
-                });
-                const data = await response.json();
-                if(data.status === 'success') {
-                    resDiv.innerHTML = `✅ Successfully Generated!<br><span class='text-xs text-gray-300'>UID: ${data.data.uid} | Name: ${data.data.name}</span>`;
-                    resDiv.className = "mt-4 text-sm text-center font-medium text-green-400";
-                } else {
-                    resDiv.innerText = "❌ Error: " + data.message;
-                    resDiv.className = "mt-4 text-sm text-center font-medium text-red-400";
-                }
-            } catch (err) {
-                resDiv.innerText = "❌ Connection failed!";
-                resDiv.className = "mt-4 text-sm text-center font-medium text-red-400";
-            } finally {
-                btn.disabled = false;
-            }
+    <button class="btn-gen" id="genBtn" onclick="createAccount()">Generate Account</button>
+
+    <div class="output-box" id="outBox">
+        <pre id="outText"></pre>
+        <button class="copy-btn" onclick="copyData()">Copy Account Details</button>
+    </div>
+</div>
+
+<script>
+let lastGeneratedData = "";
+
+async function createAccount() {
+    const btn = document.getElementById('genBtn');
+    const outBox = document.getElementById('outBox');
+    const outText = document.getElementById('outText');
+    const region = document.getElementById('region').value;
+
+    btn.innerText = "GENERATING...";
+    btn.disabled = true;
+    outBox.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ region: region })
         });
-    </script>
+
+        const res = await response.json();
+
+        if (res.success) {
+            lastGeneratedData = `UID: ${res.data.uid}\nPassword: ${res.data.password}\nRegion: ${res.data.region}\nStatus: ${res.data.status}`;
+            outText.innerText = `[SUCCESS]\n${lastGeneratedData}`;
+        } else {
+            outText.innerText = `[ERROR]\n${res.error}`;
+        }
+        outBox.style.display = 'block';
+    } catch (err) {
+        outText.innerText = `[CONNECTION ERROR]\nFailed to connect to API server.`;
+        outBox.style.display = 'block';
+    }
+
+    btn.innerText = "Generate Account";
+    btn.disabled = false;
+}
+
+function copyData() {
+    if (!lastGeneratedData) return;
+    navigator.clipboard.writeText(lastGeneratedData);
+    alert('Account details copied to clipboard!');
+}
+</script>
+
 </body>
 </html>
